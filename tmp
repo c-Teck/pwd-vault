@@ -1,0 +1,87 @@
+import os
+os.putenv("username", "John")
+os.putenv("email", "abc@gmail.com")
+
+
+
+with open(".env", "r") as f:
+    for line in f.readlines():
+        try:
+            key, value = line.split('=')
+            os.putenv(key, value)
+        except ValueError:
+            # syntax error
+            pass
+
+
+
+
+with open(".env", "w") as f:
+    f.write("username=John")
+    f.write("email=abc@gmail.com")
+
+
+
+
+# Load .env file using:
+from dotenv import load_dotenv
+load_dotenv()
+
+# Use the variable with:
+import os
+os.getenv("ACCESS_KEY")
+
+
+from decouple import config
+
+API_USERNAME = config('USER')
+API_KEY = config('KEY')
+
+
+
+# Set environment variables
+os.environ['API_USER'] = 'username'
+os.environ['API_PASSWORD'] = 'secret'
+
+# Get environment variables
+USER = os.getenv('API_USER')
+PASSWORD = os.environ.get('API_PASSWORD')
+
+# Getting non-existent keys
+FOO = os.getenv('FOO') # None
+BAR = os.environ.get('BAR') # None
+BAZ = os.environ['BAZ'] # KeyError: key does not exist.
+
+
+
+
+# A simple Python program to demonstrate
+# getpass.getpass() to read security question
+import getpass
+
+p = getpass.getpass(prompt='Your favorite flower? ')
+
+if p.lower() == 'rose':
+	print('Welcome..!!!')
+else:
+	print('The answer entered by you is incorrect..!!!')
+
+
+
+
+
+
+# Python program to demonstrate working of
+# getpass.getuser()
+import getpass
+
+user = getpass.getuser()
+
+while True:
+	pwd = getpass.getpass("User Name : %s" % user)
+
+	if pwd == 'abcd':
+		print "Welcome!!!"
+		break
+	else:
+		print "The password you entered is incorrect."
