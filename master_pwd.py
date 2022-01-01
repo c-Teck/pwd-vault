@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import os
 import string
 import secrets
+from termcolor import colored
 
 
 load_dotenv()
@@ -27,6 +28,15 @@ def salt():
         os.environ['SALT'] = secrets.token_hex(64)
     except Exception as error:
         print('ERROR', error)
+
+
+# hash given password
+'''def hashpassword(password, length):
+    # salt = secrets.token_hex(64)
+    salt_env = os.environ.get('SALT')
+    hashed = hashlib.sha512((salt_env + password).encode('utf-8')).hexdigest()
+    hashed = hashed[:length]
+    return hashed'''
 
 
 def password_gen(password_length):
@@ -98,3 +108,34 @@ def decrypt_password(password_to_decrypt, master_password_hash):
     plaintext = cipher.decrypt(convert[:-16]) 
 
     return plaintext
+
+
+def validate_password(passwd):
+    special_symbols = ['$', '@', '#', '%', '!', '&', '*', '+', '+', '_', '-']
+    val = True
+
+    if len(passwd) < 8:
+        print(colored('[-] Password length should be at least 8', 'red'))
+        val = False
+
+    if len(passwd) > 20:
+        print(colored('[-] Password length should be not be greater than 15', 'red'))
+        val = False
+
+    if not any(char.isdigit() for char in passwd):
+        print(colored('[-] Password should contain at least one numeral', 'red'))
+        val = False
+
+    if not any(char.isupper() for char in passwd):
+        print(colored('[-] Password should have at least one uppercase letter', 'red'))
+        val = False
+
+    if not any(char.islower() for char in passwd):
+        print(colored('[-] Password should contain at least one lowercase letter', 'red'))
+        val = False
+
+    if not any(char in special_symbols for char in passwd):
+        print(colored('[-] Password should contain at least a special character', 'red'))
+        val = False
+    if val:
+        return val
