@@ -16,6 +16,7 @@ import os
 import string
 import secrets
 from termcolor import colored
+from main import exit_program
 
 
 load_dotenv()
@@ -110,32 +111,85 @@ def decrypt_password(password_to_decrypt, master_password_hash):
     return plaintext
 
 
-def validate_password(passwd):
-    special_symbols = ['$', '@', '#', '%', '!', '&', '*', '+', '+', '_', '-']
-    val = True
+'''def validate_password(pwd):
+    while True:
+        try:
+            passwd = input("[+] Enter password again: ")
+            special_symbols = ['$', '@', '#', '%', '!', '&', '*', '+', '+', '_', '-']
+            val = True
 
-    if len(passwd) < 8:
-        print(colored('[-] Password length should be at least 8', 'red'))
-        val = False
+            if len(passwd) < 8:
+                print(colored('[-] Password length should be at least 8', 'red'))
+                val = False
 
-    if len(passwd) > 20:
-        print(colored('[-] Password length should be not be greater than 15', 'red'))
-        val = False
+            if len(passwd) > 20:
+                print(colored('[-] Password length should be not be greater than 15', 'red'))
+                val = False
 
-    if not any(char.isdigit() for char in passwd):
-        print(colored('[-] Password should contain at least one numeral', 'red'))
-        val = False
+            if not any(char.isdigit() for char in passwd):
+                print(colored('[-] Password should contain at least one numeral', 'red'))
+                val = False
 
-    if not any(char.isupper() for char in passwd):
-        print(colored('[-] Password should have at least one uppercase letter', 'red'))
-        val = False
+            if not any(char.isupper() for char in passwd):
+                print(colored('[-] Password should have at least one uppercase letter', 'red'))
+                val = False
 
-    if not any(char.islower() for char in passwd):
-        print(colored('[-] Password should contain at least one lowercase letter', 'red'))
-        val = False
+            if not any(char.islower() for char in passwd):
+                print(colored('[-] Password should contain at least one lowercase letter', 'red'))
+                val = False
 
-    if not any(char in special_symbols for char in passwd):
-        print(colored('[-] Password should contain at least a special character', 'red'))
-        val = False
-    if val:
-        return val
+            if not any(char in special_symbols for char in passwd):
+                print(colored('[-] Password should contain at least a special character', 'red'))
+                val = False
+
+            if val:
+                return True
+        except KeyboardInterrupt:
+            pass'''
+
+
+class Validate:
+    def __init__(self, password):
+        self.password = password
+
+    def validate_password(self):
+        try:
+            passwd = self.password
+            special_symbols = ['$', '@', '#', '%', '!', '&', '*', '+', '+', '_', '-']
+            val = True
+
+            if len(passwd) < 8:
+                print(colored('[-] Password length should be at least 8', 'red'))
+                val = False
+
+            if len(passwd) > 20:
+                print(colored('[-] Password length should be not be greater than 15', 'red'))
+                val = False
+
+            if not any(char.isdigit() for char in passwd):
+                print(colored('[-] Password should contain at least one numeral', 'red'))
+                val = False
+
+            if not any(char.isupper() for char in passwd):
+                print(colored('[-] Password should have at least one uppercase letter', 'red'))
+                val = False
+
+            if not any(char.islower() for char in passwd):
+                print(colored('[-] Password should contain at least one lowercase letter', 'red'))
+                val = False
+
+            if not any(char in special_symbols for char in passwd):
+                print(colored('[-] Password should contain at least a special character', 'red'))
+                val = False
+
+            if val:
+                return True
+        except KeyboardInterrupt:
+            exit_program()
+
+    def compare_passwd(self, psswd2):
+
+        if self.password == psswd2:
+            return True
+        else:
+            print(colored("[-] Passwords do not match, please try again.", 'red'))

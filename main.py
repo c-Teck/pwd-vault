@@ -1,35 +1,50 @@
 import os
 import sys
+import time
 import getpass
 from termcolor import colored
 from dotenv import load_dotenv
 import master_pwd
-import hashlib
+from database_manager import connect
 
 
 load_dotenv()
+
+
 def exit_program():
     print(colored("Exiting...", "red"))
+    time.sleep(2)
     sys.exit()
 
+
 def main():
+    password_attempt = 0
+    master_password_input = getpass.getpass("[+] Enter your Master Password: ").encode()
+    two_factor = os.environ.get("SALT")
 
-    master_password_input = getpass.getpass("Master Password: ").encode()
-    Two_Factor = input("[+] Enter your two factor authenticator here : ")
+    second_fa_location = two_factor.encode()
+    # second_FA_location = "Dee Boo Dah".encode()
+    # master_password_hash = hashlib.sha256(master_password_input + second_FA_location).hexdigest()
 
-    second_FA_location = Two_Factor.encode()
-    #second_FA_location = "Dee Boo Dah".encode()
-
-    master_password_hash = hashlib.sha256(master_password_input + second_FA_location).hexdigest()
-
-    if master_pwd.query_master_pwd(master_password_input, second_FA_location) is True:
-
-        connection = db_connect.connection_db()
-
-        print("\nSucessfully Authenticated.\n")
-
+    if not (master_pwd.query_master_pwd(master_password_input, second_fa_location)):
+        if password_attempt >= 3:
+            print(colored("[-] Too many wrong attempt, please try again after few minutes...", 'red'))
+            exit_program()
+        else:
+            print(colored("[-] Master password incorrect...\n >>>Try again.", 'red'))
+            password_attempt += 1
+        # connection = database_manager.connect()
     else:
-        print("Failed to authenticate into server. Run the program again.")
-        sys.exit()
+        connect()
+        if connect():
+            print(colored("[+] Authenticating...", "green"))
+            time.sleep(2)
+            print(colored("\n[+] Successfully Authenticated.\n\n", "green"))
+            time.sleep(2)
+            print(colored("[+] Opening your Vault...", "green"))
+        else:
+            print(colored("[-] Failed to connect to database. "
+                          "Ensure yo have an active connection and try again..", 'red'))
+            exit_program()
 
-
+        # return connection

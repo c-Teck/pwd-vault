@@ -1,26 +1,28 @@
 #!/usr/bin/env python3
 
-import smtplib, ssl
-from master-pwd.py import master_password_gen
-
+# import smtplib, ssl
+# from master_pwd import master_password_gen
+import os
+import getpass
+from termcolor import colored
 
 
 def signup():
-    Email = input("[+] Enter your email address to use with this vault : ")
-    Fullname = input(" [+] Enter your Fullname : ")
-    Username = input(" [+] What nickname should i call you : ")
-    sender = "pwdvault@gmail.com"
-    receiver = Email
+    '''email = input("[+] Enter your email address to use with this vault : ")
+    fullname = input(" [+] Enter your Fullname : ")
+    username = input(" [+] What nickname should i call you : ")
+    sender = ''
+    receiver = email
     port = 587
     smtp_server = 'smtp.gmail.com'
-    pwd = 'passw0RD'
+    pwd = '##'
     message = """\
     Subject: WELCOME TO PASSWORD MANAGER VAULT BY C-TECK
 
     Dear {} welcome aboard, these are the details to access your vault, keep well...
     Username : {}
     Hashed_pwd : {}
-    Salt : has been saved for secured purpose. """.format(Fullname, Username, master_password_gen())
+    Salt : has been saved for secured purpose. """.format(fullname, username, master_password_gen())
     context = ssl.create_default_context()
     with smtplib.SMTP(smtp_server, port) as server:
         try:
@@ -28,5 +30,22 @@ def signup():
             server.sendmail(sender, receiver, message)
             print("[+] Successfully created, check your Email for further action...")
         except SMTPException :
-            print(" Account created Successfully but email verification failed ")
+            print(" Account created Successfully but email verification failed ")'''
+    user = getpass.getuser()
+    print(colored("Welcome ", user), 'yellow')
+    print("[+] What is your database type:")
+    print("Mysql, Postgres, Oracle, Maria DB, SQL Server...")
+    db_type = input()
+    os.environ['DB_TYPE'] = db_type
+    db_name = input("[+] Enter your database name here :")
+    db_host = input("[+] Enter your database Host/IP here: ")
+    db_user = input("[+] Enter your database Username: ")
+    db_pwd = input("[+] Enter password")
+    db_port = int(input("[+] Enter your database port number: "))
+    os.environ['DB_PORT'] = db_port
+    os.environ['DB_NAME'] = db_name
+    os.environ['DB_HOST'] = db_host
+    os.environ['DB_USER'] = db_user
+    os.environ['DB_PWD'] = db_pwd
+
 

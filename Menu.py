@@ -6,7 +6,7 @@ import subprocess
 from pyfiglet import Figlet
 from termcolor import colored
 from dotenv import load_dotenv
-from master_pwd import password_gen
+from master_pwd import password_gen, Validate
 from database_manager import store_passwords, find_users, find_password, update_details
 
 
@@ -32,28 +32,37 @@ def menu():
 
 
 def create():
-    print('Please provide the name of the site or app you want to generate a password for')
+    print('[+] Please provide the name of the site or app you want to generate a password for')
     app_name = input()
-    print('[+]Please provide a simple password for this site or leave empty to generate a secure password for you :')
-    if input() != "":
-        plaintext = input()
-    else:
-        plaintext = password_gen(12)
-
-    # passw = password(plaintext, app_name, 12)
+    print('[+] Please provide a simple password for this site or leave '
+          'empty to generate a secure password for you :')
+    while True:
+        text = input()
+        if text != "":
+            plaintext = text
+            check_input = Validate(plaintext)
+            if check_input.validate_password() is True:
+                passwd2 = input("[+] Enter the password again: ")
+                comparison = check_input.compare_passwd(passwd2)
+                if comparison:
+                    return plaintext
+                elif not comparison:
+                    continue
+            else:
+                continue
+        else:
+            plaintext = password_gen(12)
+            return plaintext
+        # if validate_password(plaintext):
     subprocess.run('xclip', universal_newlines=True, input=plaintext)
-    print(colored('-'*30, 'red'))
+    user_email = input('[+] Please provide an email/username for this app or site')
+    secure_pwd = master_pwd.encrypt_password(plaintext, os.environ.get("MASTER"))
+    store_passwords(secure_pwd, user_email, app_name)
+    print(colored('-' * 30, 'red'))
     print('')
     print(colored('[+] Your password has now been created and copied to your clipboard', 'green'))
     print('')
-    print(colored('-'*30, 'red'))
-    user_email = input('[+] Please provide a user email for this app or site')
-    username = input('[+] Please provide a username for this app or site (if applicable)')
-    if username == "None":
-        username = ''
-    url = input('Please paste the url to the site that you are creating the password for')
-    secure_pwd = master_pwd.encrypt_password(plaintext, os.environ.get("MASTER"))
-    store_passwords(secure_pwd, user_email, username, url, app_name)
+    print(colored('-' * 30, 'red'))
 
 
 def find():
