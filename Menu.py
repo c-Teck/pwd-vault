@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 import os
-import master_pwd
 import subprocess
 from pyfiglet import Figlet
 from termcolor import colored
 from dotenv import load_dotenv
-from master_pwd import password_gen, Validate
+from master_pwd import Validate
 from database_manager import store_passwords, find_users, find_password, update_details
 
 
@@ -51,12 +50,12 @@ def create():
             else:
                 continue
         else:
-            plaintext = password_gen(12)
+            plaintext = Validate.password_gen(12)
             return plaintext
         # if validate_password(plaintext):
     subprocess.run('xclip', universal_newlines=True, input=plaintext)
     user_email = input('[+] Please provide an email/username for this app or site')
-    secure_pwd = master_pwd.encrypt_password(plaintext, os.environ.get("MASTER"))
+    secure_pwd = Validate.encrypt_password(plaintext, os.environ.get("MASTER"))
     store_passwords(secure_pwd, user_email, app_name)
     print(colored('-' * 30, 'red'))
     print('')

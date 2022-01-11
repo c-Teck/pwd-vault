@@ -72,6 +72,10 @@ load_dotenv()
 class Validate:
     def __init__(self, password):
         self.password = password
+        self.salt = secrets.token_hex(12)
+
+    def two_fact(self):
+        return self.salt
 
     def validate_password(self):
         try:
@@ -125,23 +129,15 @@ class Validate:
 
     def master_password_gen(self):
         # os.environ["SALT"] = salt().
-        master_pwd = input("Enter your master password to use for your vault : ").encode()
+        master_pwd = self.password.encode()
         # two_factor = os.environ.get("SALT").encode()
         # salt to be taken from database
-        two_factor = self.salt().encode()
+        two_factor = self.salt.encode()
         compile_factor_together = hashlib.sha256(master_pwd + two_factor).hexdigest()
         print("\n[+] Generating your hashed password...\n...\n[+] Your hashed password has been generated")
         hashed = (str(compile_factor_together))
         return hashed
         # os.environ["MASTER"] = hashed
-
-    def salt(self):
-        try:
-            # os.environ['SALT'] = secrets.token_hex(64)
-            salts = secrets.token_hex(64)
-            return salts
-        except Exception as error:
-            print('ERROR', error)
 
     def query_master_pwd(self, master_password, second_fa_location):
 
@@ -161,7 +157,7 @@ class Validate:
     def encrypt_password(self, password_to_encrypt, master_password_hash):
         # salt_auth = os.environ.get('SALT')
         # salt to be taken from the database after connection
-        salt_auth = self.salt()
+        salt_auth = self.salt
         key = PBKDF2(str(master_password_hash), salt_auth).read(32)
 
         data_convert = str.encode(password_to_encrypt)
@@ -184,7 +180,7 @@ class Validate:
             password_to_decrypt += '=' * (4 - len(password_to_decrypt) % 4)
 
         convert = b64decode(password_to_decrypt)
-        salt_auth = self.salt()
+        salt_auth = self.salt
         key = PBKDF2(str(master_password_hash), salt_auth).read(32)
 
         nonce = convert[-16:]
@@ -194,6 +190,3 @@ class Validate:
         plaintext = cipher.decrypt(convert[:-16])
 
         return plaintext
-
-
-
