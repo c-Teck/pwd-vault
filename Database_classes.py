@@ -25,6 +25,8 @@ class Database:
                                 user=self.user,
                                 password=self.password,
                         )
+        self.db_name = "PWDMGR"
+
 
     def all_db(self, db_type):
 
@@ -38,25 +40,40 @@ class Database:
                     except Error as e:
                         print(e)
 
+                def create_database(cursor):
+                    try:
+                        cursor.execute(
+                            "CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(self.db_name)
+                        )
+                    except mysql.connector.Error as err:
+                        print("Failed creating database: {}".format(err))
+                        exit(1)
+
                 # Check if Database exist and connect to it and if not create one and insert necessary tables
-                def check_database():
+                def db_tables():
                     output = connecting()
                     if output:
                         execution = self.mysql_connection.cursor()
+                        db_name = self.db_name
                         try:
                             conn = execution.execute("SHOW DATABASES")
                             for x in conn:
-                                if x[0] == PWDMGR:
-                                    db_conn = mysql.connector.connect(database="PWDMGR")
-                                    return db_conn
+                                if x[0] == db_name:
+                                    execution.database = db_name
+                                    print("[+] Database {} existed...Connecting...".format(db_name))
+                            execution.execute("USE {}".format(db_name))
 
                         except mysql.connector.Error as err:
+
                             if err.errno == errorcode.ER_BAD_DB_ERROR:
-                                print("Database does not exist...\n[+] Creating database...")
+                                print("Database {} does not exist...\n[+] Creating database...".format(db_name))
                                 time.sleep(2)
-                                execution.execute("CREATE DATABASE PWDMGR")
+                                print("Loading...")
+                                create_database(execution)
                                 execution.execute("CREATE TABLE settings (id INT AUTO_INCREMENT, key VARCHAR(30), "
                                                   "value TEXT), PRIMARY KEY (id)")
+                                execution.execute("CREATE TABLE VAULT (id INT AUTO_INCREMENT, user VARCHAR(10), "
+                                                  "email VARCHAR(20), pass TEXT, url TEXT, PRIMARY KEY (id))")
                                 insert = "INSERT INTO settings (key, value) VALUES (%s, %s)"
                                 print(colored("[+] Enter the master password you would use to securely use "
                                               "for your vault: "
@@ -89,5 +106,8 @@ class Database:
 
                         else:
                             conn.close()
+
+                def store_password(user, email, password):
+
 
 
