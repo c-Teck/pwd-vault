@@ -3,6 +3,7 @@
 # from secrets import get_secret_key
 import time
 import os.path
+from Database_classes import Database
 from main import main
 from vault_registeration import signup
 from dotenv import load_dotenv
@@ -10,7 +11,7 @@ from Menu import menu, create, find, find_accounts, update
 from main import exit_program
 from pyfiglet import Figlet
 from termcolor import colored
-# from master_pwd import query_master_pwd
+from master_pwd import Validate
 
 # menu
 # 1. create new password for a site
@@ -88,10 +89,36 @@ def start():
         env_file.close()
         load_dotenv()
         signup()
+        print(colored("[+] Enter the master password you would use to securely use "
+                      "for your vault: "
+                      "\n[+] Please save this password as it is not retrievable..", 'green'))
+        pwd_to_insert = input("[+] Enter the password here : ")
+        check_input = Validate(pwd_to_insert)
+        if check_input.validate_password() is True:
+            passwd2 = input("[+] Enter the password again: ")
+            comparison = check_input.compare_passwd(passwd2)
+
+            # if password1 == password2
+            if comparison:
+                master_password = check_input.master_password_gen()
+                values = [("MASTER", master_password),
+                          ("SALT", check_input.two_fact())]
+                Database.all_db()
+                execution.executemany(insert, values)
+                output.commit()
+                del execution
+                exit_program()
+            elif not comparison:
+                print(colored("[-] Password do not match...", 'red'))
+        else:
+            print(colored("[-] Password is not strong enough", 'red'))
+
         print(colored("[+] Saving your details...", 'yellow'))
         time.sleep(3)
         print(colored("[+] Details Successfully Saved..."
                       "Run the program again to gain access to full features of the program.", 'green'))
+        os.environ['DB_TYPE'] = input("[+] Enter your database type here: ").lower()
         os.environ['signup'] = "True"
+
         time.sleep(2)
         exit_program()

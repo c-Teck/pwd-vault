@@ -8,25 +8,37 @@ Created on Thu Jan 08 07:58:32 2022
 # Create a Database Class that support MYSQl, psycopg2,
 import time
 import datetime
+import sqlite3
+import os
+from dotenv import load_dotenv
+from enum import Enum
 from main import exit_program
 from mysql.connector import connect, Error, errorcode
 import psycopg2
 from master_pwd import Validate
 from termcolor import colored
 
+load_dotenv()
+class Database(Enum):
+    SQLITE = "sqlite3"
+    MYSQL = "mysql"
+    POSTGRES = "postgres"
+    ORACLE = "oracle"
 
-class Database:
 
-    def __init__(self, host, user, password):
-        self.host = host
-        self.user = user
-        self.password = password
-        self.db_name = "PWDMGR"
+
+    def __init__(self):
+        self.host = os.environ.get("DB_HOST")
+        self.user = os.environ.get("DB_USER")
+        self.password = os.environ.get("DB_PWD")
+        self.db_name = os.environ.get("DB_NAME")
+        self.sqlite3_connection = sqlite3.connect((self.db_name + ".db"))
         self.mysql_connection = mysql.connector.connect(
                                 host=self.host,
                                 user=self.user,
                                 password=self.password,
                         )
+
         self.TABLES = {'VAULT': (
             "CREATE TABLE `VAULT` ("
             "  `id` int(10) NOT NULL AUTO_INCREMENT,"
@@ -45,11 +57,11 @@ class Database:
             "  PRIMARY KEY (`id`)"
             ") ENGINE=InnoDB")}
 
-    def all_db(self, db_type):
-
+    def all_db(self):
+        db_type = os.environ.get("DB_TYPE")
         match db_type:
 
-            case MYSQL:
+            case Database.MYSQL:
                 def connecting():
                     try:
                         with self.mysql_connection as conn:
@@ -158,7 +170,7 @@ class Database:
                             print('-' * 30)
 
                     else:
-                        print(" Invalid input")
+                        print("[-] Invalid input")
 
                     cursor.close()
                     cnx.close()
@@ -180,37 +192,207 @@ class Database:
 
                     cursor.close()
                     cnx.close()
-                    print(colored("[+] Enter the master password you would use to securely use "
-                                              "for your vault: "
-                                              "\n[+] Please save this password as it is not retrievable..", 'green'))
-                                pwd_to_insert = input("[+] Enter the password here : ")
-                                check_input = Validate(pwd_to_insert)
-                                if check_input.validate_password() is True:
-                                    passwd2 = input("[+] Enter the password again: ")
-                                    comparison = check_input.compare_passwd(passwd2)
 
-                                    # if password1 == password2
-                                    if comparison:
-                                        master_password = check_input.master_password_gen()
-                                        values = [("MASTER", master_password),
-                                                  ("SALT", check_input.two_fact())]
-                                        execution.executemany(insert, values)
-                                        output.commit()
-                                        del execution
-                                        exit_program()
-                                    elif not comparison:
-                                        print(colored("[-] Password do not match...", 'red'))
-                                else:
-                                    print(colored("[-] Password is not strong enough", 'red'))
+                    # These functions delete an entry in the database, given a url
+                def delete_account(account_to_delete):
+                    try:
+                        cnx = self.mysql_connection
+                        cursor = cnx.cursor()
+                        cursor.execute("Delete * FROM VAULT WHERE url = %s'", (account_to_delete,))
+                    except (Exception, Error) as error:
+                        print(error)
 
-                            elif err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                                print("[-] Something is wrong with your user name or password.")
+                # Function to Update a given entry in the database
+                def update_details(ansa):
+                    if ansa == '1':
+                        try:
+                            app = input("[+] Provide the url where you want to change the Email : ")
+                            new = input("[+] provide the new Email \n >>> ")
+                            connection = self.mysql_connection
+                            cursor = connection.cursor()
+                            cursor.execute("UPDATE VAULT set email = %s' WHERE app_name= %s'", (new, app))
+                        except (Exception, Error) as error:
+                            print(error)
 
-                            else:
-                                print(err)
+                    elif ansa == '2':
+                        try:
+                            app = input("[+] Provide the app/site name where you want to change the password : ")
+                            new = input("[+] provide the new password \n >>> ")
+                            connection = self.mysql_connection
+                            cursor = connection.cursor()
+                            cursor.execute("UPDATE VAULT set password = %s' WHERE app_name= %s'", (new, app))
+                        except (Exception, Error) as error:
+                            print(error)
 
+                    elif ansa == '3':
+                        try:
+                            app = input("[+] Provide the app/site name where you want to change the Username : ")
+                            new = input("[+] provide the new username \n >>> ")
+                            connection = self.mysql_connection
+                            cursor = connection.cursor()
+                            cursor.execute("UPDATE VAULT set username = %s' WHERE app_name= %s'", (new, app))
+                        except (Exception, Error) as error:
+                            print(error)
+
+                    elif ansa == '4':
+                        try:
+                            app = input("[+] Provide the app/site name where you want to change the Url : ")
+                            new = input("[+] provide the new Url \n >>> ")
+                            connection = self.mysql_connection
+                            cursor = connection.cursor()
+                            cursor.execute("UPDATE VAULT set url = %s' WHERE app_name= %s'", (new, app))
+                        except (Exception, Error) as error:
+                            print(error)
+
+                    else:
+                        print("Invalid input")
+                        exit_program()
+
+            case Database.SQLITE:
+                dbase_name = self.db_name + '.db'
+
+                def create_connection(db_name):
+                    """
+                    Function creates a connection to db_name database and returns it
+                    """
+                    connection = self.sqlite3_connection(db_name)
+                    return connection
+
+                def create_table(table):
+                    conn = create_connection(dbase_name)
+                    print(colored("[+] Successfully Authenticated...", 'green'))
+
+                    print("[+] Creating Table {}".format(table), end='')
+                    # print(colored("already exists.", 'yellow'))
+
+
+                    conn.executescript('''CREATE TABLE VAULT
+                             (ID INT PRIMARY KEY     NOT NULL   AUTO_INCREMENT,
+                             user           varchar(14)    NOT NULL,
+                             app_name       varchar(14)    NOT NULL,
+                             site_url       CHAR(50)       NOT NULL,
+                             email         varchar(20)     NOT NULL,
+                             pass           TEXT           NOT NULL,
+                             created_date   date           NOT NULL
+                             );
+                             CREATE TABLE SETTINGS
+                             (ID INT PRIMARY KEY     NOT NULL   AUTO_INCREMENT,
+                             key           varchar(40)    NOT NULL,
+                             value           TEXT           NOT NULL,
+                             created_date   date           NOT NULL
+                             );
+                             ''')
+
+                def write_data_to_db(query, data):
+                    """
+                    Function awaits arguments:
+                    * connection - connection to DB
+                    * query - query to execute
+                    * data - data to be passed as a list of tuples
+
+                    Function attempts to write all data from *data* list.
+                    If data is saved successfully, changes are saved to database and returns True.
+
+                    If an error occurs during the writing process, transaction rolls back and function returns False.
+
+                    """
+                    conn = create_connection(dbase_name)
+                    try:
+                        with conn:
+                            conn.executemany(query, data)
+                    except sqlite3.IntegrityError as e:
+                        print('Error occurred: ', e)
+                        return False
+                    else:
+                        print('[+] Data writing was successful')
+                        return True
+
+                def write_rows_to_db_2(query, data, verbose=False):
+                    """
+                        Function awaits arguments:
+                         * connection - connection to DB
+                         * query - query to execute
+                         * data - data to be passed as a list of tuples
+
+                        Function attempts to write a tuples in turn from *data* list.
+                        If tuple can be written successfully, changes are saved to database.
+                        If an error occurs while writing the tuple, transaction rolls back.
+
+
+                        Flag *verbose* controls whether messages about successful or unsuccessful tuple
+                        writing attempt.
+
+                    """
+                    conn = create_connection(dbase_name)
+                    for row in data:
+                        try:
+                            with conn:
+                                conn.execute(query, row)
+                        except sqlite3.IntegrityError as e:
+                            if verbose:
+                                print("Error occurred while writing data '{}'".format(', '.join(row), e))
                         else:
-                            conn.close()
+                            if verbose:
+                                print("Data writing  was successful '{}'".format(
+                                        ', '.join(row)))
+
+                def find_password(app_name):
+
+                    try:
+                        connection = create_connection(dbase_name)
+                        cursor = connection.cursor()
+                        cursor.execute("SELECT pass FROM VAULT WHERE app_name = %s'", (app_name,))
+                        connection.commit()
+                        result = cursor.fetchone()
+                        print('[+] Password is: ', result[0])
+                        cursor.close()
+                        connection.close()
+                    except sqlite3.InterfaceError as e:
+                        print(colored("[+] Error :", e, 'red'))
+
+                    else:
+                        print(colored("[-] Error...", 'red'))
+                        cursor.close()
+                        connection.close()
+                        exit_program()
+
+
+
+                def find_users(user_email):
+                    data = ('Password: ', 'Email: ', 'Username: ', 'url: ', 'App/Site name: ')
+                    try:
+                        connection = create_connection(dbase_name)
+                        cursor = connection.cursor()
+                        # postgres_select_query = """ SELECT * FROM VAULT WHERE email = '""" + user_email + "'"
+                        # cursor.execute(postgres_select_query, user_email)
+                        cursor.execute("SELECT * FROM VAULT WHERE email = %s'", (user_email,))
+                        connection.commit()
+                        result = cursor.fetchall()
+                        print('')
+                        print('RESULT')
+                        print('')
+                        for row in result:
+                            for i in range(0, len(row) - 1):
+                                print(data[i] + row[i])
+                        print('')
+                        print('-' * 30)
+                        cursor.close()
+                        connection.close()
+
+                    except sqlite3.InterfaceError as e:
+                        print(colored("[+] Error :", e, 'red'))
+
+
+                # These functions delete an entry in the database, given a url
+                def delete_account(account_to_delete):
+                    try:
+                        connection = create_connection(dbase_name)
+                        cursor = connection.cursor()
+                        cursor.execute("Delete * FROM VAULT WHERE url = %s'", (account_to_delete,))
+                    except (Exception, Error) as error:
+                        print(error)
+
+
 
                 def store_password(user, email, password):
 

@@ -88,45 +88,45 @@ def delete_account():
         print(error)
 
 
-def update_details(ansa):
-    if ansa == '1':
-        try:
-            app = input("[+] Provide the url where you want to change the Email : ")
-            new = input("[+] provide the new Email \n >>> ")
-            connection = connect()
-            cursor = connection.cursor()
-            cursor.execute("UPDATE VAULT set email = %s' WHERE app_name= %s'", (new, app))
-        except (Exception, psycopg2.Error) as error:
-            print(error)
-    elif ansa == '2':
-        try:
-            app = input("[+] Provide the url where you want to change the password : ")
-            new = input("[+] provide the new password \n >>> ")
-            connection = connect()
-            cursor = connection.cursor()
-            cursor.execute("UPDATE VAULT set password = %s' WHERE app_name= %s'", (new, app))
-        except (Exception, psycopg2.Error) as error:
-            print(error)
+    def update_details(ansa):
+        if ansa == '1':
+            try:
+                app = input("[+] Provide the url where you want to change the Email : ")
+                new = input("[+] provide the new Email \n >>> ")
+                connection = connect()
+                cursor = connection.cursor()
+                cursor.execute("UPDATE VAULT set email = %s' WHERE app_name= %s'", (new, app))
+            except (Exception, psycopg2.Error) as error:
+                print(error)
+        elif ansa == '2':
+            try:
+                app = input("[+] Provide the app/site name where you want to change the password : ")
+                new = input("[+] provide the new password \n >>> ")
+                connection = connect()
+                cursor = connection.cursor()
+                cursor.execute("UPDATE VAULT set password = %s' WHERE app_name= %s'", (new, app))
+            except (Exception, psycopg2.Error) as error:
+                print(error)
 
-    elif ansa == '3':
-        try:
-            app = input("[+] Provide the url where you want to change the Username : ")
-            new = input("[+] provide the new username \n >>> ")
-            connection = connect()
-            cursor = connection.cursor()
-            cursor.execute("UPDATE VAULT set username = %s' WHERE app_name= %s'", (new, app))
-        except (Exception, psycopg2.Error) as error:
-            print(error)
+        elif ansa == '3':
+            try:
+                app = input("[+] Provide the app/site name where you want to change the Username : ")
+                new = input("[+] provide the new username \n >>> ")
+                connection = connect()
+                cursor = connection.cursor()
+                cursor.execute("UPDATE VAULT set username = %s' WHERE app_name= %s'", (new, app))
+            except (Exception, psycopg2.Error) as error:
+                print(error)
 
-    elif ansa == '4':
-        try:
-            app = input("[+] Provide the url where you want to change the Url : ")
-            new = input("[+] provide the new Url \n >>> ")
-            connection = connect()
-            cursor = connection.cursor()
-            cursor.execute("UPDATE VAULT set url = %s' WHERE app_name= %s'", (new, app))
-        except (Exception, psycopg2.Error) as error:
-            print(error)
+        elif ansa == '4':
+            try:
+                app = input("[+] Provide the app/site name where you want to change the Url : ")
+                new = input("[+] provide the new Url \n >>> ")
+                connection = connect()
+                cursor = connection.cursor()
+                cursor.execute("UPDATE VAULT set url = %s' WHERE app_name= %s'", (new, app))
+            except (Exception, psycopg2.Error) as error:
+                print(error)
 
-    else:
-        print("Invalid input")
+        else:
+            print("Invalid input")

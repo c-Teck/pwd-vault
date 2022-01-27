@@ -5,12 +5,14 @@
 import os
 import getpass
 from termcolor import colored
+from dotenv import load_dotenv
 
 
+load_dotenv()
 def signup():
     '''email = input("[+] Enter your email address to use with this vault : ")
     fullname = input(" [+] Enter your Fullname : ")
-    username = input(" [+] What nickname should i call you : ")
+    username = input(" [+] What nickname should I call you : ")
     sender = ''
     receiver = email
     port = 587
@@ -34,18 +36,16 @@ def signup():
     user = getpass.getuser()
     print(colored("Welcome ", user), 'yellow')
     print("[+] What is your database type:")
-    print("Mysql, Postgres, Oracle, Maria DB, SQL Server...")
-    db_type = input()
+    print("Mysql, Postgres, Oracle, SQLite3...")
+    db_type = input("Enter db type from those listed above here : ").lower()
     os.environ['DB_TYPE'] = db_type
     db_name = input("[+] Enter your database name here :")
     db_host = input("[+] Enter your database Host/IP here: ")
     db_user = input("[+] Enter your database Username: ")
     db_pwd = input("[+] Enter password")
-    db_port = int(input("[+] Enter your database port number: "))
+    db_port = (input("[+] Enter your database port number: "))
     os.environ['DB_PORT'] = db_port
     os.environ['DB_NAME'] = db_name
     os.environ['DB_HOST'] = db_host
     os.environ['DB_USER'] = db_user
     os.environ['DB_PWD'] = db_pwd
-
-
