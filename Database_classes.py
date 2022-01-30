@@ -6,10 +6,11 @@ Created on Thu Jan 08 07:58:32 2022
 @author: cybree
 """
 # Create a Database Class that support MYSQl, psycopg2,
+import os
 import time
 import datetime
 import sqlite3
-import os
+import mysql.connector
 from dotenv import load_dotenv
 from enum import Enum
 from main import exit_program
@@ -17,6 +18,7 @@ from mysql.connector import connect, Error, errorcode
 import psycopg2
 from master_pwd import Validate
 from termcolor import colored
+
 
 load_dotenv()
 class Database(Enum):
@@ -37,7 +39,11 @@ class Database(Enum):
                                 host=self.host,
                                 user=self.user,
                                 password=self.password,
+                                database=self.db_name
                         )
+        self.postgres_connection = psycopg2.connect(user=self.user, password=self.password, host=self.host,
+                                                    database=self.db_name
+                                                    )
 
         self.TABLES = {'VAULT': (
             "CREATE TABLE `VAULT` ("
@@ -55,7 +61,8 @@ class Database(Enum):
             "  `key` varchar(40) NOT NULL,"
             "  `value` TEXT NOT NULL,"
             "  PRIMARY KEY (`id`)"
-            ") ENGINE=InnoDB")}
+            ") ENGINE=InnoDB")
+        }
 
     def all_db(self):
         db_type = os.environ.get("DB_TYPE")
@@ -168,6 +175,8 @@ class Database(Enum):
                                     print(data[i] + row[i])
                             print('')
                             print('-' * 30)
+
+
 
                     else:
                         print("[-] Invalid input")
@@ -393,8 +402,120 @@ class Database(Enum):
                         print(error)
 
 
-
                 def store_password(user, email, password):
 
 
+            case Database.POSTGRES:
 
+                def store_passwords(password, user_email, url):
+                    try:
+                        connection = connect()
+                        cursor = connection.cursor()
+                        postgres_insert_query = """ INSERT INTO VAULT (password, email, url) 
+                            VALUES (%s, %s, %s)"""
+                        record_to_insert = (password, user_email, url)
+                        cursor.execute(postgres_insert_query, record_to_insert)
+                        connection.commit()
+                    except (Exception, psycopg2.Error) as error:
+                        print(error)
+
+                def connect():
+                    try:
+                        return self.postgres_connection
+                    except (Exception, psycopg2.Error) as error:
+                        print(error + " [-]Failed to connect to Database...")
+
+
+
+                def find_password(app_name):
+                    try:
+                        connection = connect()
+                        cursor = connection.cursor()
+                        cursor.execute("SELECT password FROM VAULT WHERE app_name = %s'", (app_name,))
+                        # postgres_select_query = """ SELECT password FROM VAULT WHERE app_name = '""" + app_name + "'"
+                        # cursor.execute(postgres_select_query, app_name)
+                        connection.commit()
+                        result = cursor.fetchone()
+                        print('Password is: ')
+                        print(result[0])
+
+                    except (Exception, psycopg2.Error) as error:
+                        print(error)
+
+                def find_users(user_email):
+                    data = ('Password: ', 'Email: ', 'Username: ', 'url: ', 'App/Site name: ')
+                    try:
+                        connection = connect()
+                        cursor = connection.cursor()
+                        # postgres_select_query = """ SELECT * FROM VAULT WHERE email = '""" + user_email + "'"
+                        # cursor.execute(postgres_select_query, user_email)
+                        cursor.execute("SELECT * FROM VAULT WHERE email = %s'", (user_email,))
+                        connection.commit()
+                        result = cursor.fetchall()
+                        print('')
+                        print('RESULT')
+                        print('')
+                        for row in result:
+                            for i in range(0, len(row) - 1):
+                                print(data[i] + row[i])
+                        print('')
+                        print('-' * 30)
+                    except (Exception, psycopg2.Error) as error:
+                        print(error)
+
+                def update_db_passwd():
+                    update_query_passwd = """UPDATE Vault SET passwd = %s WHERE url = %s"""
+                    return update_query_passwd
+
+                def delete_account():
+                    print("[+] provide app_name or a unique details about the entry you want to delete : ")
+                    entry = input()
+                    try:
+                        connection = connect()
+                        cursor = connection.cursor()
+                        cursor.execute("Delete * FROM VAULT WHERE app_name = %s'", (entry,))
+                    except (Exception, psycopg2.Error) as error:
+                        print(error)
+
+                def update_details(ansa):
+                    if ansa == '1':
+                        try:
+                            app = input("[+] Provide the url where you want to change the Email : ")
+                            new = input("[+] provide the new Email \n >>> ")
+                            connection = connect()
+                            cursor = connection.cursor()
+                            cursor.execute("UPDATE VAULT set email = %s' WHERE app_name= %s'", (new, app))
+                        except (Exception, psycopg2.Error) as error:
+                            print(error)
+                    elif ansa == '2':
+                        try:
+                            app = input("[+] Provide the app/site name where you want to change the password : ")
+                            new = input("[+] provide the new password \n >>> ")
+                            connection = connect()
+                            cursor = connection.cursor()
+                            cursor.execute("UPDATE VAULT set password = %s' WHERE app_name= %s'", (new, app))
+                        except (Exception, psycopg2.Error) as error:
+                            print(error)
+
+                    elif ansa == '3':
+                        try:
+                            app = input("[+] Provide the app/site name where you want to change the Username : ")
+                            new = input("[+] provide the new username \n >>> ")
+                            connection = connect()
+                            cursor = connection.cursor()
+                            cursor.execute("UPDATE VAULT set username = %s' WHERE app_name= %s'", (new, app))
+                        except (Exception, psycopg2.Error) as error:
+                            print(error)
+
+                    elif ansa == '4':
+                        try:
+                            app = input("[+] Provide the app/site name where you want to change the Url : ")
+                            new = input("[+] provide the new Url \n >>> ")
+                            connection = connect()
+                            cursor = connection.cursor()
+                            cursor.execute("UPDATE VAULT set url = %s' WHERE app_name= %s'", (new, app))
+                        except (Exception, psycopg2.Error) as error:
+                            print(error)
+
+                    else:
+                        print("Invalid input")

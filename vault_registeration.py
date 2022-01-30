@@ -9,7 +9,10 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
+
+
 def signup():
+
     '''email = input("[+] Enter your email address to use with this vault : ")
     fullname = input(" [+] Enter your Fullname : ")
     username = input(" [+] What nickname should I call you : ")

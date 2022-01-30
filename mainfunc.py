@@ -101,13 +101,10 @@ def start():
             # if password1 == password2
             if comparison:
                 master_password = check_input.master_password_gen()
+
                 values = [("MASTER", master_password),
                           ("SALT", check_input.two_fact())]
-                Database.all_db()
-                execution.executemany(insert, values)
-                output.commit()
-                del execution
-                exit_program()
+                return values  # work here, this can't return values, it should write it to db.
             elif not comparison:
                 print(colored("[-] Password do not match...", 'red'))
         else:
