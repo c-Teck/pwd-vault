@@ -3,7 +3,7 @@
 # from secrets import get_secret_key
 import time
 import os.path
-from Database_classes import Database
+from Database_classes import db_to_run
 from main import main
 from vault_registeration import signup
 from dotenv import load_dotenv
@@ -87,6 +87,7 @@ def start():
             for i in file_to_write:
                 env_file.write(i + '=')
         env_file.close()
+
         load_dotenv()
         signup()
         print(colored("[+] Enter the master password you would use to securely use "
@@ -94,17 +95,29 @@ def start():
                       "\n[+] Please save this password as it is not retrievable..", 'green'))
         pwd_to_insert = input("[+] Enter the password here : ")
         check_input = Validate(pwd_to_insert)
+
         if check_input.validate_password() is True:
             passwd2 = input("[+] Enter the password again: ")
             comparison = check_input.compare_passwd(passwd2)
 
             # if password1 == password2
             if comparison:
+                db_type = os.environ.get('DB_TYPE')
+                table = 'settings'
                 master_password = check_input.master_password_gen()
-
                 values = [("MASTER", master_password),
                           ("SALT", check_input.two_fact())]
-                return values  # work here, this can't return values, it should write it to db.
+                execute = db_to_run(db_type)
+
+                conn = execute.connect_db()
+                if conn:
+                    execute.create_table()
+                    execute.insert_into_table(table, values)
+
+                else:
+                    print("[+] Internal error occurred.")
+
+                # return values  # work here, this can't return values, it should write it to db.
             elif not comparison:
                 print(colored("[-] Password do not match...", 'red'))
         else:
@@ -114,7 +127,7 @@ def start():
         time.sleep(3)
         print(colored("[+] Details Successfully Saved..."
                       "Run the program again to gain access to full features of the program.", 'green'))
-        os.environ['DB_TYPE'] = input("[+] Enter your database type here: ").lower()
+
         os.environ['signup'] = "True"
 
         time.sleep(2)
