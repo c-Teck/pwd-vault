@@ -8,6 +8,7 @@ Created on Thu Jan 30 07:58:32 2022
 # Create a Database Class that support MYSQl, psycopg2,
 import os
 import time
+import cx_Oracle
 import datetime
 import sqlite3
 import psycopg2
@@ -587,3 +588,34 @@ class Oracle(Database):
 
     def __init__(self):
         super().__init__()
+        self.dsn = cx_Oracle.makedsn("dbhost.example.com", 1521, service_name="orclpdb1")
+        self.Oracle_connection = cx_Oracle.connect(
+                                host=self.host,
+                                user=self.user,
+                                password=self.password,
+                                dsn=self.dsn,
+                                encoding="UTF-8",
+                        )
+
+    def connect_db(self):
+        try:
+            with self.Oracle_connection as conn:
+                return conn
+        except cx_Oracle.DatabaseError as err:
+            error, = err.args
+            if error.code:
+                print("Oracle-Error-Code:", error.code)
+                print("Oracle-Error-Message:", error.message)
+                print("Database {} does not exist...\n[+] Creating database...".format(self.db_name))
+                time.sleep(2)
+                print(">>> Loading...")
+                cursor = self.Oracle_connection.cursor()
+                cursor.execute(
+                    "CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(self.db_name)
+                )
+                cursor.execute("USE {}".format(self.db_name))
+                cursor.close()
+
+            else:
+                print(colored("[-] Failed with the following error: ", 'red'), error.message)
+
