@@ -4,11 +4,9 @@
 import time
 import os.path
 from Database_classes import db_to_run
-from main import main
 from vault_registeration import signup
 from dotenv import load_dotenv
 from Menu import menu, create, find, find_accounts, update
-from main import exit_program
 from pyfiglet import Figlet
 from termcolor import colored
 from master_pwd import Validate
@@ -35,9 +33,7 @@ f_font = Figlet(font='banner3-D')
 def start():
     print(colored('-' * 30, 'red'))
     print('')
-    colors = ['yellow', 'red', 'green', 'blue']
-    for color in colors:
-        print(colored(f_font.renderText("C-TECK PASSWORD MANAGER"), color))
+    print(colored(f_font.renderText("C-TECK PASSWORD MANAGER"), 'red'))
     print('')
     print(colored('-' * 30, 'red'))
 
@@ -50,10 +46,12 @@ def start():
             return False
 
     run_type = check_first_run()
+    from main import exit_program
 
     if run_type:
         try:
-            main()
+            from main import main_prog
+            main_prog()
             choice = menu()
             while choice not in terminate_buttons:
                 try:
@@ -85,7 +83,7 @@ def start():
         file_to_write = ['DB_HOST', 'DB_TYPE', 'DB_NAME', 'DB_USER', 'DB_PORT', 'DB_PWD', 'signup']
         with open('.env', 'w') as env_file:
             for i in file_to_write:
-                env_file.write(i + '=')
+                env_file.write(i + '=\n')
         env_file.close()
 
         load_dotenv()
@@ -132,3 +130,6 @@ def start():
 
         time.sleep(2)
         exit_program()
+
+
+start()

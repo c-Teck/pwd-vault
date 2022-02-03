@@ -6,7 +6,6 @@ Created on Thu Jan 08 07:58:32 2022
 @author: cybree
 """
 # Create a Database Class that support MYSQl, psycopg2,
-from master_pwd import Validate
 
 from termcolor import colored
 
@@ -53,6 +52,7 @@ def get_master(db_type, table, key):
 
 
 def get_master_plain(db_type, master_input):
+    from master_pwd import Validate
     two_factor = get_salt(db_type, 'settings', 'SALT')
 
     second_fa_location = two_factor.encode()
@@ -64,5 +64,3 @@ def get_master_plain(db_type, master_input):
 
     else:
         print("[-] Something went wrong...")
-
-

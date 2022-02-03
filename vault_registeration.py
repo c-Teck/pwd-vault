@@ -37,7 +37,7 @@ def signup():
         except SMTPException :
             print(" Account created Successfully but email verification failed ")'''
     user = getpass.getuser()
-    print(colored("Welcome ", user), 'yellow')
+    print(colored("Welcome ", 'yellow'), user)
     print("[+] What is your database type:")
     print("Mysql, Postgres, Oracle, SQLite3...")
     db_type = input("Enter db type from those listed above here : ").lower()
@@ -45,7 +45,7 @@ def signup():
     db_name = input("[+] Enter your database name here :")
     db_host = input("[+] Enter your database Host/IP here: ")
     db_user = input("[+] Enter your database Username: ")
-    db_pwd = input("[+] Enter password")
+    db_pwd = input("[+] Enter password: ")
     db_port = (input("[+] Enter your database port number: "))
     os.environ['DB_PORT'] = db_port
     os.environ['DB_NAME'] = db_name

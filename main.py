@@ -5,8 +5,6 @@ import getpass
 from termcolor import colored
 from dotenv import load_dotenv
 from master_pwd import Validate
-from Database_classes import get_salt
-from Database_classes import db_to_run
 
 
 load_dotenv()
@@ -18,7 +16,9 @@ def exit_program():
     sys.exit()
 
 
-def main():
+def main_prog():
+    from Database_classes import get_salt
+    from Database_classes import db_to_run
     password_attempt = 0
     master_password_input = getpass.getpass("[+] Enter your Master Password: ").encode()
     db_name = os.environ.get("DB_TYPE")

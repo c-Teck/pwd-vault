@@ -43,7 +43,7 @@ class Database:
         self.TABLES = {'VAULT': (
             "CREATE TABLE `VAULT` ("
             "  `id` int(10) NOT NULL AUTO_INCREMENT,"
-            "  `user` varchar(14) NOT NULL,"
+            "  `user` varchar(14),"
             "  `app_name` varchar(20) NOT NULL,"
             "  `site_url` varchar(20) NOT NULL,"
             "  `email` varchar(20) NOT NULL,"
@@ -115,7 +115,7 @@ class Mysql(Database):
             cursor.execute(insert, val)
             # return insert
         elif table == "VAULT":
-            insert = "INSERT INTO {} (user, app_name, site_url, email, pass, created_date) " \
+            insert = "INSERT INTO {} (key, value) " \
                      "VALUES (%s, %s, %s, %s, %s, %s)".format(table)
             cursor.execute(insert, val)
             # return insert
@@ -288,7 +288,7 @@ class Postgres(Database):
             cursor.execute(insert, val)
             # return insert
         elif table == "VAULT":
-            insert = "INSERT INTO {} (user, app_name, site_url, email, pass, created_date) " \
+            insert = "INSERT INTO {} (key, value) " \
                      "VALUES (%s, %s, %s, %s, %s, %s)".format(table)
             cursor.execute(insert, val)
             # return insert
@@ -492,7 +492,8 @@ class Sqlite(Database):
             cursor.execute(insert, value)
             # return insert
         elif table == "VAULT":
-            insert = "INSERT INTO {} (user, app_name, site_url, email, pass, created_date) " \
+            # (user, app_name, site_url, email, pass, created_date)
+            insert = "INSERT INTO {}  (key, value)" \
                      "VALUES (%s, %s, %s, %s, %s, %s)".format(table)
             cursor.execute(insert, value)
             # return insert
@@ -618,4 +619,14 @@ class Oracle(Database):
 
             else:
                 print(colored("[-] Failed with the following error: ", 'red'), error.message)
+
+    def delete_account(self, entry_to_delete):
+        cnx = self.Oracle_connection
+        cursor = cnx.cursor()
+        try:
+            cursor.execute("Delete * FROM VAULT WHERE url = %s'", (entry_to_delete,))
+        except (Exception, Error) as error:
+            print(error)
+        cursor.close()
+
 

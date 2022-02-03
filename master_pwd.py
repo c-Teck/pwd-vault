@@ -7,8 +7,8 @@ Created on Thu Sep 30 10:04:32 2021
 """
 
 # from hashlib import sha256
-from Database_classes import get_master, get_salt
-from Cryptodome.Cipher import AES 
+
+from Crypto.Cipher import AES
 from pbkdf2 import PBKDF2
 import hashlib
 from base64 import b64encode, b64decode
@@ -17,7 +17,6 @@ import os
 import string
 import secrets
 from termcolor import colored
-from main import exit_program
 
 
 load_dotenv()
@@ -79,6 +78,7 @@ class Validate:
         return self.salt
 
     def validate_password(self):
+        from main import exit_program
         try:
             passwd = self.password
             special_symbols = ['$', '@', '#', '%', '!', '&', '*', '+', '+', '_', '-']
@@ -141,7 +141,7 @@ class Validate:
         # os.environ["MASTER"] = hashed
 
     def query_master_pwd(self, second_fa_location):
-
+        from Database_classes import get_master
         # Enter password hash in ******** field. Use PBKDF2 and Salt from above.
         # Use master_password_hash_generator.py to generate a master password hash.
         # master password to be fetched from database
