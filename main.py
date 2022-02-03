@@ -2,11 +2,11 @@ import os
 import sys
 import time
 import getpass
-from Database_classes import db_to_run
 from termcolor import colored
 from dotenv import load_dotenv
 from master_pwd import Validate
-from database_manager import Database
+from Database_classes import get_salt
+from Database_classes import db_to_run
 
 
 load_dotenv()
@@ -21,13 +21,15 @@ def exit_program():
 def main():
     password_attempt = 0
     master_password_input = getpass.getpass("[+] Enter your Master Password: ").encode()
-    two_factor = os.environ.get("SALT")
+    db_name = os.environ.get("DB_TYPE")
+    two_factor = get_salt(db_name, 'settings', 'SALT')
 
     second_fa_location = two_factor.encode()
     # second_FA_location = "Dee Boo Dah".encode()
     # master_password_hash = hashlib.sha256(master_password_input + second_FA_location).hexdigest()
+    master_pwd = Validate(master_password_input)
 
-    if not (Validate.query_master_pwd(master_password_input, second_fa_location)):
+    if not master_pwd.query_master_pwd(second_fa_location):
         if password_attempt >= 3:
             print(colored("[-] Too many wrong attempt, please try again after few minutes...", 'red'))
             exit_program()
@@ -36,8 +38,8 @@ def main():
             password_attempt += 1
         # connection = database_manager.connect()
     else:
-        db_type = os.environ.get('DB_TYPE')
-        execute = db_to_run(db_type)
+
+        execute = db_to_run(db_name)
         connect = execute.connect_db()
         if connect():
             print(colored("[+] Authenticating...", "green"))

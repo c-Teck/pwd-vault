@@ -7,11 +7,13 @@ from termcolor import colored
 from dotenv import load_dotenv
 from master_pwd import Validate
 from database_manager import store_passwords, find_users, find_password, update_details
+from Database_classes import get_master, get_salt, get_master_plain
 
 
 f = Figlet(font='isometric2')
 f_font = Figlet(font='banner3-D')
 load_dotenv()
+db_type = os.environ.get('DB_TYPE')
 
 
 def menu():
@@ -50,12 +52,16 @@ def create():
             else:
                 continue
         else:
-            plaintext = Validate.password_gen(12)
+            text = ''
+            plaintext = Validate(text)
+            plaintext = plaintext.password_gen(12)
             return plaintext
         # if validate_password(plaintext):
     subprocess.run('xclip', universal_newlines=True, input=plaintext)
     user_email = input('[+] Please provide an email/username for this app or site')
-    secure_pwd = Validate.encrypt_password(plaintext, os.environ.get("MASTER"))
+    pwd = Validate(plaintext)
+    master_encrypt = get_master_plain(db_type, plaintext)
+    secure_pwd = pwd.encrypt_password(master_encrypt)
     store_passwords(secure_pwd, user_email, app_name)
     print(colored('-' * 30, 'red'))
     print('')
