@@ -79,10 +79,10 @@ class Validate:
 
     def validate_password(self):
         from main import exit_program
+        val = True
         try:
             passwd = self.password
             special_symbols = ['$', '@', '#', '%', '!', '&', '*', '+', '+', '_', '-']
-            val = True
 
             if len(passwd) < 8:
                 print(colored('[-] Password length should be at least 8', 'red'))
@@ -115,10 +115,14 @@ class Validate:
 
     def compare_passwd(self, psswd2):
 
-        if self.password == psswd2:
-            return True
-        else:
-            print(colored("[-] Passwords do not match, please try again.", 'red'))
+        while True:
+
+            if self.password == psswd2:
+                return True
+            else:
+                print(colored("[-] Error", 'red'))
+                psswd2 = input(" [ Password entered do not match the one above, please try again.] \n "
+                               "[+] Retry password again: ")
 
     def password_gen(self, password_length):
 

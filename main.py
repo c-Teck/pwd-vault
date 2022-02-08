@@ -53,3 +53,18 @@ def main_prog():
             exit_program()
 
         # return connection
+
+
+def remain_in_loop(password):
+    while True:
+        # pwd_to_insert = input("[+] Enter the password here : ")
+        check_input = Validate(password)
+
+        if check_input.validate_password():
+            print(">>> Password accepted...")
+            return password
+
+        else:
+            password = input(" [ Password entered does not meet one or more of the above requirement.] \n"
+                             "[+] Retry password again: ")
+

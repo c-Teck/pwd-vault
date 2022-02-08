@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from Menu import menu, create, find, find_accounts, update
 from pyfiglet import Figlet
 from termcolor import colored
-from master_pwd import Validate
+from main import remain_in_loop
 
 # menu
 # 1. create new password for a site
@@ -32,9 +32,11 @@ f_font = Figlet(font='banner3-D')
 
 def start():
     print(colored('-' * 30, 'red'))
+    print(colored('-' * 30, 'red'))
     print('')
     print(colored(f_font.renderText("C-TECK PASSWORD MANAGER"), 'red'))
     print('')
+    print(colored('-' * 30, 'red'))
     print(colored('-' * 30, 'red'))
 
     # Check for env file and if not one, Create Signup and fix database details into the env file!!!
@@ -80,22 +82,18 @@ def start():
             exit_program()
     # else the program is first run...hence register, request database details and create a .env file
     else:
-        file_to_write = ['DB_HOST', 'DB_TYPE', 'DB_NAME', 'DB_USER', 'DB_PORT', 'DB_PWD', 'signup']
-        with open('.env', 'w') as env_file:
-            for i in file_to_write:
-                env_file.write(i + '=\n')
-        env_file.close()
-
+        from master_pwd import Validate
         load_dotenv()
         signup()
         print(colored("[+] Enter the master password you would use to securely use "
                       "for your vault: "
                       "\n[+] Please save this password as it is not retrievable..", 'green'))
-        pwd_to_insert = input("[+] Enter the password here : ")
-        check_input = Validate(pwd_to_insert)
 
-        if check_input.validate_password() is True:
-            passwd2 = input("[+] Enter the password again: ")
+        while True:
+            pwd_to_insert = input("[+] Enter the password here : ")
+            remain_in_loop(pwd_to_insert)
+            check_input = Validate(pwd_to_insert)
+            passwd2 = input("[+] Enter the above password again: ")
             comparison = check_input.compare_passwd(passwd2)
 
             # if password1 == password2
@@ -111,25 +109,25 @@ def start():
                 if conn:
                     execute.create_table()
                     execute.insert_into_table(table, values)
+                    print(colored("[+] Saving your details...", 'yellow'))
+                    time.sleep(3)
+                    print(colored("[+] Details Successfully Saved..."
+                                  "Run the program again to gain access to full features of the program.", 'green'))
+
+                    os.environ['signup'] = "True"
+
+                    time.sleep(2)
+                    exit_program()
 
                 else:
                     print("[+] Internal error occurred.")
 
-                # return values  # work here, this can't return values, it should write it to db.
+                    # return values  # work here, this can't return values, it should write it to db.
             elif not comparison:
                 print(colored("[-] Password do not match...", 'red'))
-        else:
-            print(colored("[-] Password is not strong enough", 'red'))
 
-        print(colored("[+] Saving your details...", 'yellow'))
-        time.sleep(3)
-        print(colored("[+] Details Successfully Saved..."
-                      "Run the program again to gain access to full features of the program.", 'green'))
-
-        os.environ['signup'] = "True"
-
-        time.sleep(2)
-        exit_program()
+            else:
+                print(colored("[-] Password is not strong enough", 'red'))
 
 
 start()
